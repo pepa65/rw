@@ -753,7 +753,11 @@ fn sender_print_code(
     let qr =
         qr2term::generate_qr_string(&uri).context("Failed to generate QR code for send link")?;
     writeln!(term, "{}", qr)?;
-    writeln!(term, "\u{001B}]8;;{}\u{001B}\\{}\u{001B}]8;;\u{001B}\\\n", &uri, &uri)?;
+    writeln!(
+        term,
+        "\u{001B}]8;;{}\u{001B}\\{}\u{001B}]8;;\u{001B}\\\n",
+        &uri, &uri
+    )?;
     writeln!(
         term,
         "On the other side, open the link or enter that code into a Magic Wormhole client."

@@ -40,7 +40,7 @@ jobs:
           toolchain: stable
           components: clippy
       - name: cargo clippy
-        run: cargo clippy --default-features --target=x86_64-unknown-linux-gnu
+        run: cargo clippy --target=x86_64-unknown-linux-gnu
 
   dist:
     name: "Dist (${{ matrix.os }})"
