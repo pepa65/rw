@@ -27,5 +27,7 @@ strip = "symbols"
 = Disable clipboard default feature: cli/Cargo.toml
 = change name/version/repo: Cargo.toml|cli/Cargo.toml
 
+= Adjust the workflow: .github.com/workflow/push.yml
+
 - Rephrase some messages
 - Comments to //
