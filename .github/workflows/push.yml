@@ -82,7 +82,7 @@ jobs:
           path: target
           key: ${{ runner.os }}-test-build-target-stable
       - name: Build
-        run: cargo build -p rw --target ${{ matrix.target }} --bins --locked --release
+        run: cargo build -p rw --target ${{ matrix.target }} --bins --release
       - name: Tar binaries
         run: |
           pushd "target/${{ matrix.target }}/release/"
