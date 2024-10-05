@@ -175,6 +175,6 @@ jobs:
           body: ${{ steps.query-changelog.outputs.release-notes }}
           files: "./dist/**/rw-*"
           fail_on_unmatched_files: false
-          prerelease: ${{ contains(steps.query-version.outputs.version, '-') }}
-          draft: ${{ steps.check-tag.outputs.tag == 0 && !startsWith(github.ref, 'refs/tags/') }}
-          make_latest: ${{ !contains(steps.query-version.outputs.version, '-') && startsWith(github.ref, 'refs/tags/') }}
+          prerelease: false #${{ contains(steps.query-version.outputs.version, '-') }}
+          draft: false #${{ steps.check-tag.outputs.tag == 0 && !startsWith(github.ref, 'refs/tags/') }}
+          make_latest: true #${{ !contains(steps.query-version.outputs.version, '-') && startsWith(github.ref, 'refs/tags/') }}
