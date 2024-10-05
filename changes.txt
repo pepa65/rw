@@ -1,0 +1,31 @@
+Edits to magic-wormhole.rs/magic-wormhole.rs
+
+= NUMWORDS default to 4: cli/src/main.rs
+= Aliases: s(send) r(receive): cli/src/main.rs
+= Hardcoded 'wormhole' to 'rw': cli/src/main.rs
+= Write link under QR: cli/src/main.rs
+writeln!(term, "\u{001B}]8;;{}\u{001B}\\{}\u{001B}]8;;\u{001B}\\\n", &uri, &uri)?;
+
+= Static compile option: .cargo/config.toml:
+```
+[alias]
+rel = "build --release --target=x86_64-unknown-linux-musl"
+zig = "zigbuild --release --target=x86_64-unknown-linux-musl"
+
+[target.x86_64-unknown-linux-musl]
+rustflags = "-Ctarget-feature=+crt-static"
+```
+
+= Smaller binaries: Cargo.toml:
+```
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+```
+
+= Disable clipboard default feature: cli/Cargo.toml
+= change name/version/repo: Cargo.toml|cli/Cargo.toml
+
+- Rephrase some messages
+- Comments to //

@@ -1,5 +1,5 @@
 [package]
-name = "magic-wormhole-cli"
+name = "rw"
 categories = ["command-line-utilities"]
 
 version.workspace = true
@@ -14,21 +14,21 @@ rust-version.workspace = true
 edition.workspace = true
 
 [[bin]]
-name = "wormhole-rs"
+name = "rw"
 path = "src/main.rs"
 
 [dependencies]
-serde = { workspace = true, features = ["rc"] }
+serde = { workspace = true}
 serde_json = { workspace = true }
 serde_derive = { workspace = true }
-url = { workspace = true, features = ["serde"] }
+url = { workspace = true}
 futures = { workspace = true }
 async-std = { workspace = true, features = ["attributes", "unstable"] }
 rand = { workspace = true }
 
 # CLI specific dependencies
-magic-wormhole = { path = "..", version = "0.7", features = ["all"] }
-clap = { workspace = true, features = ["cargo", "derive", "help"] }
+magic-wormhole = { path = "..", version = "0.7", default-features = false }
+clap = { workspace = true, features = ["derive"] }
 clap_complete = { workspace = true }
 env_logger = { workspace = true }
 console = { workspace = true }
@@ -38,10 +38,8 @@ color-eyre = { workspace = true }
 number_prefix = { workspace = true }
 ctrlc = { workspace = true }
 qr2term = { workspace = true }
-arboard = { optional = true, workspace = true, features = [
-    "wayland-data-control",
-] } # Wayland by default, fallback to X11.
-tracing = { workspace = true, features = ["log", "log-always"] }
+arboard = { optional = true, workspace = true} # Wayland by default, fallback to X11.
+tracing = { workspace = true}
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
 
 [dev-dependencies]
@@ -57,5 +55,6 @@ native-tls = ["magic-wormhole/native-tls"]
 experimental-transfer-v2 = ["magic-wormhole/experimental-transfer-v2"]
 experimental = ["experimental-transfer-v2"]
 
-default = ["clipboard", "magic-wormhole/default", "magic-wormhole/forwarding"]
+#default = ["clipboard", "magic-wormhole/default", "magic-wormhole/forwarding"]
+default = ["magic-wormhole/default", "magic-wormhole/forwarding"]
 all = ["default", "magic-wormhole/native-tls"]

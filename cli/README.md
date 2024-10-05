@@ -8,8 +8,8 @@ This package provides a library and a command-line tool named wormhole-rs, which
 
 ### GitHub Releases
 
-We publish source code and binaries to GitHub releases. Visit the [releases page](https://github.com/magic-wormhole/magic-wormhole.rs/releases) for the latest release.
-
+We publish source code and binaries to GitHub releases. Visit the [releases page](https://github.com/pepa65/rw/releases) for the latest release.
+<!--
 Or use [cargo binstall](https://github.com/cargo-bins/cargo-binstall):
 
 ```bash
@@ -45,4 +45,4 @@ Options:
 Run a subcommand with `--help` to know how it's used.
 To send files, use `wormhole send <PATH>`.
 To receive files, use `wormhole receive <CODE>`.
-```
+--?>```

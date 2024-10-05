@@ -82,7 +82,7 @@ struct CommonLeaderArgs {
     #[arg(long, value_name = "CODE")]
     code: Option<String>,
     /// Length of code (in bytes/words)
-    #[arg(short = 'c', long, value_name = "NUMWORDS", default_value = "2")]
+    #[arg(short = 'c', long, value_name = "NUMWORDS", default_value = "4")]
     code_length: usize,
 }
 
@@ -169,7 +169,7 @@ enum ForwardCommand {
 #[derive(Debug, Subcommand)]
 enum WormholeCommand {
     /// Send a file or a folder
-    #[command(visible_alias = "tx")]
+    #[command(visible_alias = "s", alias = "tx")]
     Send {
         #[clap(flatten)]
         common: CommonArgs,
@@ -179,7 +179,7 @@ enum WormholeCommand {
         common_send: CommonSenderArgs,
     },
     /// Receive a file or a folder
-    #[command(visible_alias = "rx")]
+    #[command(visible_alias = "r", alias = "rx")]
     Receive {
         /// Accept file transfer without asking for confirmation
         #[arg(long, visible_alias = "yes")]
@@ -237,9 +237,9 @@ enum WormholeCommand {
     arg_required_else_help = true,
     disable_help_subcommand = true,
     propagate_version = true,
-    after_help = "Run a subcommand with `--help` to know how it's used.\n\
-                 To send files, use `wormhole send <PATH>`.\n\
-                 To receive files, use `wormhole receive <CODE>`."
+    after_help = format!("Run a subcommand with `--help` to know how it's used.\n\
+                 To send files, use `rw s <PATH>`.\n\
+                 To receive files, use `rw r <CODE>`.")
 )]
 struct WormholeCli {
     /// Enable logging to stdout, for debugging purposes
@@ -753,7 +753,7 @@ fn sender_print_code(
     let qr =
         qr2term::generate_qr_string(&uri).context("Failed to generate QR code for send link")?;
     writeln!(term, "{}", qr)?;
-
+    writeln!(term, "\u{001B}]8;;{}\u{001B}\\{}\u{001B}]8;;\u{001B}\\\n", &uri, &uri)?;
     writeln!(
         term,
         "On the other side, open the link or enter that code into a Magic Wormhole client."

@@ -1,8 +1,10 @@
-# Rusty Wormhole
+# rw v0.7.2
+**Rusty Wormhole**
 
 Get things from one computer to another, safely.
 
-<http://magic-wormhole.io/>
+* Repo: https://
+* Website: <http://magic-wormhole.io/>
 
 This is a Rust port of the Python version at <https://github.com/magic-wormhole/magic-wormhole>.
 
