@@ -49,10 +49,7 @@ This work is licensed under the EUPL v1.2 or later. Contact the owner(s) for use
 [![Irc][irc-room-image]][irc-room-url]
 ![Build Status][build-status-image]
 [![Deps][deps-status-image]][deps-status-url]
-[![Codecov][codecov-image]][codecov-url]
 [![Is-It-Maintained-Resolution-Time][iim-resolution-image]][iim-resolution-url]
-[![Crates.io][crates-io-image]][crates-io-url]
-[![Docs.rs][docs-image]][docs-url]
 
 [matrix-room-image]: https://img.shields.io/badge/matrix.org-%23magic--wormhole-brightgreen
 [matrix-room-url]: https://matrix.to/#/#magic-wormhole:matrix.org
