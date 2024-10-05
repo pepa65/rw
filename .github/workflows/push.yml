@@ -40,7 +40,7 @@ jobs:
           toolchain: stable
           components: clippy
       - name: cargo clippy
-        run: cargo clippy --all-features
+        run: cargo clippy --default-features --target=x86_64-unknown-linux-gnu
 
   dist:
     name: "Dist (${{ matrix.os }})"
@@ -82,7 +82,7 @@ jobs:
           path: target
           key: ${{ runner.os }}-test-build-target-stable
       - name: Build
-        run: cargo build -p rw-cli --target ${{ matrix.target }} --bins --locked --release
+        run: cargo build -p rw --target ${{ matrix.target }} --bins --locked --release
       - name: Tar binaries
         run: |
           pushd "target/${{ matrix.target }}/release/"
