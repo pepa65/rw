@@ -92,8 +92,8 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: rw_${{ matrix.target }}
-          path: target/${{ matrix.target }}/release/rw${{ matrix.ext }}_${{ matrix.target }}
+          name: rw${{ matrix.ext }}_${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/rw
           if-no-files-found: error
 
   release:
