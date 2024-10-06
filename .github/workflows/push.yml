@@ -8,11 +8,31 @@ on:
     branches: [main, dev]
 
 jobs:
+  read_msrv:
+    name: Read MSRV
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust (stable)
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: Read MSRV from workspace manifest
+        id: read_msrv
+        run: |
+          cargo metadata --no-deps --format-version=1 \
+          | jq -r 'first(.packages[]).rust_version' \
+          | sed -E 's/^1\.([0-9]{2})$/1\.\1\.0/' \
+          | xargs -0 printf "msrv=%s" \
+          | tee /dev/stderr \
+          >> "$GITHUB_OUTPUT"
+    outputs:
+      msrv: ${{ steps.read_msrv.outputs.msrv }}
+
   formatting:
     name: Cargo Format
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Ensure rustfmt is installed and setup problem matcher
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: rustfmt
@@ -40,7 +60,76 @@ jobs:
           toolchain: stable
           components: clippy
       - name: cargo clippy
-        run: cargo clippy --target=x86_64-unknown-linux-gnu
+        run: cargo clippy --all-features
+
+  test:
+    name: "Test (${{ matrix.os }} ${{ matrix.channel }})"
+    needs:
+      - read_msrv
+    runs-on: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        channel:
+          - MSRV
+          - stable
+          - nightly
+        os:
+          - Linux
+          - Windows
+          - macOS
+        include:
+          - os: Linux
+            image: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: Windows
+            image: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: macOS
+            image: macos-latest
+            target: aarch64-apple-darwin
+          - channel: msrv
+            rust: ${{ needs.read_msrv.outputs.msrv }}
+          - channel: stable
+            rust: stable
+          - channel: nightly
+            rust: nightly
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust }}
+          target: wasm32-unknown-unknown
+      - name: Cache ~/.cargo
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-test-dotcargo-${{ matrix.rust }}
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-test-build-target-${{ matrix.rust }}
+      - name: build library (no default features)
+        run: cargo build -p magic-wormhole --target ${{ matrix.target }} --no-default-features
+      - name: build library (features=transit)
+        run: cargo build -p magic-wormhole --target ${{ matrix.target }} --no-default-features --features=transit
+      - name: build library (features=transfer)
+        run: cargo build -p magic-wormhole --target ${{ matrix.target }} --no-default-features --features=transfer
+      - name: build library (features=forwarding)
+        run: cargo build -p magic-wormhole --target ${{ matrix.target }} --no-default-features --features=forwarding
+      - name: build CLI
+        run: cargo build -p magic-wormhole-cli --target ${{ matrix.target }} --features=all
+      - name: build WASM
+        run: cargo build -p magic-wormhole --target wasm32-unknown-unknown --no-default-features --features transit --features transfer
+      - name: test
+        uses: nick-fields/retry@v3
+        with:
+          max_attempts: 3
+          polling_interval_seconds: 30
+          timeout_minutes: 30
+          retry_on_exit_code: 101
+          command: cargo test --verbose --workspace --features=all,native-tls,experimental
 
   dist:
     name: "Dist (${{ matrix.os }})"
@@ -82,19 +171,74 @@ jobs:
           path: target
           key: ${{ runner.os }}-test-build-target-stable
       - name: Build
-        run: cargo build -p rw --target ${{ matrix.target }} --bins --release
-      # Always zipped...
-      #- name: Tar binaries
-      #  run: |
-      #    pushd "target/${{ matrix.target }}/release/"
-      #    tar -cvzf "rw-${{ matrix.target }}.tgz" "wormhole-rs${{ matrix.ext }}"
-      #    popd
+        run: cargo build -p magic-wormhole-cli --target ${{ matrix.target }} --bins --locked --release
+      - name: Tar binaries
+        run: |
+          pushd "target/${{ matrix.target }}/release/"
+          tar -cvzf "magic-wormhole-cli-${{ matrix.target }}.tgz" "wormhole-rs${{ matrix.ext }}"
+          popd
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: rw${{ matrix.ext }}
-          path: target/${{ matrix.target }}/release/rw_${{ matrix.target }}
+          name: magic-wormhole-cli-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/magic-wormhole-cli-${{ matrix.target }}.tgz
           if-no-files-found: error
+
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly
+      - uses: taiki-e/cache-cargo-install-action@v2
+        with:
+          tool: cargo-tarpaulin
+      - name: Cache ~/.cargo
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-coverage-dotcargo
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-coverage-cargo-build-target
+      - name: Run tarpaulin
+        run: cargo tarpaulin --workspace --out Xml
+      - name: upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  cargo-deny:
+    name: Cargo deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly
+      - name: Checkout Rust toolcnain
+        uses: actions/checkout@v4
+      - uses: EmbarkStudios/cargo-deny-action@v1
+
+  semver:
+    name: SemVer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly
+      - name: Check semver
+        uses: obi1kenobi/cargo-semver-checks-action@v2
+      - name: Extract Changelog
+        uses: release-flow/keep-a-changelog-action@v3
+        with:
+          command: query
+          version: unreleased
 
   release:
     name: Release
@@ -118,24 +262,24 @@ jobs:
           else
             echo "tag=0" >> "$GITHUB_OUTPUT"
           fi
-      #- name: Extract Changelog for ${{ steps.query-version.outputs.version }}
-      #  id: query-changelog
-      #  uses: release-flow/keep-a-changelog-action@v3
-      #  with:
-      #    command: query
-      #    version: ${{ steps.query-version.outputs.version }}
+      - name: Extract Changelog for ${{ steps.query-version.outputs.version }}
+        id: query-changelog
+        uses: release-flow/keep-a-changelog-action@v3
+        with:
+          command: query
+          version: ${{ steps.query-version.outputs.version }}
       - uses: actions/download-artifact@v4
         with:
           path: "./dist"
-          pattern: "rw*"
+          pattern: "magic-wormhole-cli-*"
       - name: Update Release
         uses: softprops/action-gh-release@v2
         if: ${{ startsWith(github.ref, 'refs/tags/') || startsWith(github.ref, 'refs/heads/main') }}
         with:
           name: "Version ${{ steps.query-version.outputs.version }}"
-          body: "" #${{ steps.query-changelog.outputs.release-notes }}
-          files: "./dist/**/rw*"
-          fail_on_unmatched_files: false
-          prerelease: false #${{ contains(steps.query-version.outputs.version, '-') }}
-          draft: false #${{ steps.check-tag.outputs.tag == 0 && !startsWith(github.ref, 'refs/tags/') }}
+          body: ${{ steps.query-changelog.outputs.release-notes }}
+          files: "./dist/**/magic-wormhole-cli-*"
+          fail_on_unmatched_files: true
+          prerelease: ${{ contains(steps.query-version.outputs.version, '-') }}
+          draft: ${{ steps.check-tag.outputs.tag == 0 && !startsWith(github.ref, 'refs/tags/') }}
           make_latest: ${{ !contains(steps.query-version.outputs.version, '-') && startsWith(github.ref, 'refs/tags/') }}
