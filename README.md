@@ -1,4 +1,4 @@
-# rw v0.7.7
+# rw v0.7.8
 **Rusty Wormhole**
 
 Get things from one computer to another, safely.
