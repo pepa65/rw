@@ -11,7 +11,9 @@
 * See <http://magic-wormhole.io/>
 * Rust port of the Python version: <https://github.com/magic-wormhole/magic-wormhole>
 * After: <https://github.com/magic-wormhole/magic-wormhole.rs>
+  - Has many unfixed code warnings and security advisories.
 * Repo: <https://github.com/pepa65/rwh>
+  - This repo fixes all the code warnings and security audit issues of the parent repo above.
 * License: EUPL v1.2 or later
 
 ## Install
