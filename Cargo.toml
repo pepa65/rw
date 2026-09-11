@@ -1,6 +1,6 @@
 [package]
 name = "rwh"
-version = "0.13.3"
+version = "0.13.4"
 authors = ["Fina Wilke <code@felinira.net>", "piegames <info@piegames.de>", "Brian Warner <warner@lothar.com>", "github.com/pepa65"]
 description = "Safe filetransfer through magic-wormhole"
 keywords = ["magic-wormhole", "wormhole", "file-transfer", "transfer"]

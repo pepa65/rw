@@ -5,7 +5,7 @@
 [![license](https://img.shields.io/badge/License-EUPLv1.2-blue.svg)](https://github.com/pepa65/rwh/blob/main/LICENSE)
 [![downloads](https://img.shields.io/crates/d/rwh.svg)](https://crates.io/crates/rwh)
 
-# rwh 0.13.3
+# rwh 0.13.4
 **Rusty Wormhole - Safe filetransfer through magic-wormhole**
 
 * See <http://magic-wormhole.io/>
@@ -19,7 +19,7 @@
 ## Install
 ### Install standalone single-binary
 ```
-wget https://github.com/pepa65/rwh/releases/download/0.13.3/rwh
+wget https://github.com/pepa65/rwh/releases/download/0.13.4/rwh
 sudo chown root:root rwh
 sudo chmod +x
 sudo mv qr /usr/local/bin/
@@ -62,7 +62,7 @@ The binaries will be installed into `~/.cargo/bin/` which still needs to be adde
 
 ## Usage
 ```
-rwh 0.13.3 - Safe filetransfer through magic-wormhole
+rwh 0.13.4 - Safe filetransfer through magic-wormhole
 Usage: rwh [OPTIONS] <COMMAND>
 Commands:
   send       Send a file/folder [alias: s]
